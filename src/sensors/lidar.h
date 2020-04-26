@@ -81,6 +81,11 @@ struct Lidar
 	double maxDistance;
 	double resoultion;
 	double sderr;
+	int numLayers;
+	double steepestAngle;
+	double angleRange;
+	double horizontalAngleInc;
+	
 
 	Lidar(std::vector<Car> setCars, double setGroundSlope)
 		: cloud(new pcl::PointCloud<pcl::PointXYZ>()), position(0,0,2.6)
@@ -95,13 +100,22 @@ struct Lidar
 		groundSlope = setGroundSlope;
 
 		// TODO:: increase number of layers to 8 to get higher resoultion pcd
-		int numLayers = 3;
+		numLayers = 3;
 		// the steepest vertical angle
-		double steepestAngle =  30.0*(-pi/180);
-		double angleRange = 26.0*(pi/180);
+		steepestAngle =  30.0*(-pi/180);
+		angleRange = 26.0*(pi/180);
 		// TODO:: set to pi/64 to get higher resoultion pcd
-		double horizontalAngleInc = pi/6;
+		horizontalAngleInc = pi/6;
 
+		updateRays();
+	}
+
+	~Lidar()
+	{
+		// pcl uses boost smart pointers for cloud pointer so we don't have to worry about manually freeing the memory
+	}
+	void updateRays(){
+		rays.clear();
 		double angleIncrement = angleRange/numLayers;
 
 		for(double angleVertical = steepestAngle; angleVertical < steepestAngle+angleRange; angleVertical+=angleIncrement)
@@ -112,11 +126,6 @@ struct Lidar
 				rays.push_back(ray);
 			}
 		}
-	}
-
-	~Lidar()
-	{
-		// pcl uses boost smart pointers for cloud pointer so we don't have to worry about manually freeing the memory
 	}
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr scan()
@@ -131,6 +140,49 @@ struct Lidar
 		cloud->width = cloud->points.size();
 		cloud->height = 1; // one dimensional unorganized point cloud dataset
 		return cloud;
+	}
+
+	void modifyLidarParams(double minDistanceNew, 
+						double maxDistanceNew,
+						double groundSlopeNew = 999, 
+						double resoultionNew = 999, 
+						double sderrNew = 999, 
+						int numLayersNew = 999,
+						double steepestAngleNew = 999,
+						double angleRangeNew = 999,
+						double horizontalAngleIncNew = 999){
+		
+		// std::cout << minDistanceNew << "  " <<
+		// 			 maxDistanceNew << "  " <<
+		// 			 groundSlopeNew << "  " <<
+		// 			 resoultionNew  << "  " <<
+		// 			 sderrNew  << "  " <<
+		// 			 numLayersNew << "  " <<
+		// 			 steepestAngleNew  << "  " <<
+		// 			 angleRangeNew  << "  " <<
+		// 			 horizontalAngleIncNew  << "  " << std::endl;
+		minDistance = minDistanceNew;
+		maxDistance = maxDistanceNew;
+		groundSlope = (std::fabs(groundSlopeNew - 999) < 0.0001)  ? groundSlope : groundSlopeNew ;
+		resoultion = (std::fabs(resoultionNew - 999) < 0.001) ? resoultion : resoultionNew;
+		sderr = (std::fabs(sderrNew - 999) < 0.001) ? sderr : sderrNew;
+		numLayers = (numLayersNew == 999) ? numLayers : numLayersNew;
+		steepestAngle = (std::fabs(steepestAngleNew - 999) < 0.001) ? steepestAngle : steepestAngleNew;
+		angleRange = (std::fabs(angleRangeNew - 999) < 0.001) ? angleRange : angleRangeNew;
+		horizontalAngleInc = (std::fabs(horizontalAngleIncNew) < 0.001) ? horizontalAngleInc : horizontalAngleIncNew;
+
+		// std::cout << minDistanceNew << "  " <<
+		// 			 maxDistanceNew << "  " <<
+		// 			 groundSlopeNew << "  " <<
+		// 			 resoultionNew  << "  " <<
+		// 			 sderrNew  << "  " <<
+		// 			 numLayersNew << "  " <<
+		// 			 steepestAngleNew  << "  " <<
+		// 			 angleRangeNew  << "  " <<
+		// 			 horizontalAngleIncNew  << "  " << std::endl;
+
+		updateRays();
+		
 	}
 
 };
