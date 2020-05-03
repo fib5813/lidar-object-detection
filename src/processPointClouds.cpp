@@ -39,26 +39,37 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
 
 
 template<typename PointT>
-std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> 
-ProcessPointClouds<PointT>::SeparateClouds(pcl::PointIndices::Ptr inliers, typename pcl::PointCloud<PointT>::Ptr cloud) 
-{
-  // TODO: Create two new point clouds, one cloud with obstacles and other with segmented plane
-    pcl::PointCloud<pcl::PointXYZ>::Ptr groundPlane( new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr nonGroundPlane(new pcl::PointCloud<pcl::PointXYZ>);
-    // int k = 0;
-    // for(pcl::PointXYZ i : cloud->points){
-    for(size_t i = 0U; i < cloud->points.size(); i++){
-        // std::cout << inliers->indices[1] << "  " << i << std::endl;
-        if(i ==  inliers->indices[i]){
-            groundPlane->push_back(cloud->points[inliers->indices[i]]) ;
-            std::cout << "groundplane" << cloud->points[inliers->indices[i]] << std::endl;
-        }
-        else{
-            nonGroundPlane->push_back(cloud->points[inliers->indices[i]]);
-            // std::cout << cloud->points[inliers->indices[i]] << std::endl;
-        }
+std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::SeparateClouds(pcl::PointIndices::Ptr inliers, typename pcl::PointCloud<PointT>::Ptr cloud) {
 
+  // TODO: Create two new point clouds, one cloud with obstacles and other with segmented plane
+    typename pcl::PointCloud<PointT>::Ptr groundPlane( new pcl::PointCloud<PointT>);
+    typename pcl::PointCloud<PointT>::Ptr nonGroundPlane(new pcl::PointCloud<PointT>);
+    // int k = 0;
+    // for(size_t i = 0U; i < cloud->points.size(); i++){
+    //     // std::cout << inliers->indices[1] << "  " << i << std::endl;
+    //     if(i ==  inliers->indices[i]){
+    //         groundPlane->push_back(cloud->points[inliers->indices[i]]) ;
+    //         std::cout << "groundplane" << cloud->points[inliers->indices[i]] << std::endl;
+    //     }
+    //     else{
+    //         nonGroundPlane->push_back(cloud->points[inliers->indices[i]]);
+    //         // std::cout << cloud->points[inliers->indices[i]] << std::endl;
+    //     }
+
+    // }
+    for(int index : inliers->indices){
+        groundPlane->points.push_back(cloud->points[index]);
+    
     }
+
+    pcl::ExtractIndices<PointT> extract;
+    extract.setInputCloud(cloud);
+    extract.setIndices(inliers);
+    extract.setNegative(true);
+    extract.filter(*nonGroundPlane);
+
+    
+    
     std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> segResult(groundPlane, nonGroundPlane);
     return segResult;
 }

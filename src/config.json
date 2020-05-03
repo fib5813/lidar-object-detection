@@ -1,0 +1,14 @@
+{
+    "pi": 3.14,
+    "groundSlope" : 0.0,
+    "minDistance" : 3.50,
+    "maxDistance" : 200,
+    "resolution" : 0.1,
+    "sderr" : 0.03,
+    "numLayers" : 32,
+    "steepestAngle" : -30,
+    "angleRange" : 30,
+    "horizontalAngleInc" : 2,
+    "numIterationsPlaneDetection" : 50,
+    "distanceThresholdPlaneDetection" : 0.04
+}

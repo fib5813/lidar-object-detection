@@ -7,6 +7,7 @@
 #include "processPointClouds.h"
 // using templates for processPointClouds so also include .cpp to help linker
 #include "processPointClouds.cpp"
+#include "setConfig.h"
 
 std::vector<Car> initHighway(bool renderScene, pcl::visualization::PCLVisualizer::Ptr& viewer)
 {
@@ -41,18 +42,25 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     // -----Open 3D viewer and display simple highway -----
     // ----------------------------------------------------
     
+
+    Config config;
+    setConfiguration(config);
+
     // RENDER OPTIONS
     bool renderScene = true;
     std::vector<Car> cars = initHighway(renderScene, viewer);
-    double groundSlope = 0.0;
-    double minDistance = 5.0;
-    double maxDistance = 200;
-    double resolution = 0.1;
-    double sderr = 0.03;
-    double numLayers = 16;
-    double steepestAngle = (pi/180)*(-30);
-    double angleRange = (pi/180) * 45;
-    double horizontalAngleInc = (pi/180) * 2;
+    double groundSlope = config.kGroundSlope;
+    double minDistance = config.kMinDistance;
+    double maxDistance = config.kMaxDistance;
+    double resolution = config.kResolution;
+    double sderr = config.kSderr;
+    double numLayers = config.kNumLayers;
+    double steepestAngle = (pi/180)*config.kSteepestAngle;
+    double angleRange = (pi/180) * config.kAngleRange;
+    double horizontalAngleInc = (pi/180) * config.kHorizontalAngleInc;
+    double numIterationsPlaneDetection = config.kNumIterationsPlaneDetection;
+    double distanceThresholdPlaneDetection = config.kDistanceThresholdPlaneDetection;
+    // std::cout << groundSlope << "  " << minDistance << "  " << maxDistance << "  " << resolution << "  " << sderr << "  " << numLayers << "  " << steepestAngle << "  " << angleRange << "  " << horizontalAngleInc << std::endl;
 
 
     // TODO:: Create lidar sensor 
@@ -72,10 +80,11 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     // TODO:: Create point processor
 
     ProcessPointClouds<pcl::PointXYZ> pointCloudProcessor;
-    std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> separatedClouds = pointCloudProcessor.SegmentPlane(lidarOutput, 5, 0.01);
+    std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> 
+    separatedClouds = pointCloudProcessor.SegmentPlane(lidarOutput, numIterationsPlaneDetection, distanceThresholdPlaneDetection);
     // renderRays(viewer, lidar->position, lidarOutput);
-    renderPointCloud(viewer, separatedClouds.first, "lidar output", Color(100, 256, 60));
-    renderPointCloud(viewer, separatedClouds.second, "lidar output");
+    renderPointCloud(viewer, separatedClouds.first, "non ground", Color(1, 0, 0));
+    renderPointCloud(viewer, separatedClouds.second, "lidar output", Color(0,1,0));
     
     
   
