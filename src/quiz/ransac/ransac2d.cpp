@@ -6,6 +6,23 @@
 #include "../../processPointClouds.h"
 // using templates for processPointClouds so also include .cpp to help linker
 #include "../../processPointClouds.cpp"
+#include "fstream"
+#include "../../json.hpp"
+#include "../../ransac_impl/ransac_impl.h"
+
+struct Config {
+
+	double kmaxIterations;
+	double kthreshold; 
+};
+
+void setConfig(Config& c){
+	std::ifstream ifs("/home/user/projects/lidar-object-detection/src/quiz/ransac/config.json");
+    nlohmann::json j = nlohmann::json::parse(ifs);
+
+	c.kmaxIterations = j.at("maxIterations");
+	c.kthreshold = j.at("threshold");
+}
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr CreateData()
 {
@@ -61,7 +78,9 @@ pcl::visualization::PCLVisualizer::Ptr initScene()
   	return viewer;
 }
 
-std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int maxIterations, float distanceTol)
+
+std::unordered_set<int> Ransac2d(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, 
+								 double maxIterations, double distanceTol)
 {
 	std::unordered_set<int> inliersResult;
 	srand(time(NULL));
@@ -76,10 +95,49 @@ std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int ma
 	// If distance is smaller than threshold count it as inlier
 
 	// Return indicies of inliers from fitted line with most inliers
+	// std::cout << maxIterations << std::endl;
+	while(maxIterations-- ){
+		std::unordered_set<int> inliers;
+		while(inliers.size() < 2){
+			inliers.insert(rand()%cloud->points.size());
+		}
+		float x1 = cloud->points[*inliers.begin()].x;
+		float x2 = cloud->points[*++inliers.begin()].x;
+		float y1 = cloud->points[*inliers.begin()].y;
+		float y2 = cloud->points[*++inliers.begin()].y;
+
+		float a = y1 - y2;
+		float b = x2 - x1;
+		float c = (x1 * y2) - (x2 * y1);
+
+		for(int i = 0; i < cloud->size(); i++){
+			if(inliers.find(i) != inliers.end()){
+				continue;
+			}
+			
+			float x3 = cloud->points[i].x;
+			float y3 = cloud->points[i].y;
+
+			float dist = std::fabs((a*x3) + (b*y3) + c)/sqrt((a*a) + (b*b));
+			// std::cout << x1 << "  " << x2 << "  " << y1 << "  " << y2 << "  " << a << "  " << b << "  " << c << "  " << x3 << "  " << y3 << "  " << dist << std::endl;
+			if(dist < distanceTol){
+				inliers.insert(i);
+				// std::cout << x1 << "  " << x2 << "  " << y1 << "  " << y2 << "  " << a << "  " << b << "  " << c << "  " << x3 << "  " << y3 << "  " << dist << "   " << distanceTol << std::endl;
+			}
+
+		}
+
+		if(inliers.size() > inliersResult.size()){
+			inliersResult = inliers;
+		}
+
+	}
 	
 	return inliersResult;
 
 }
+
+
 
 int main ()
 {
@@ -89,10 +147,13 @@ int main ()
 
 	// Create data
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = CreateData();
-	
+	Config c;
+	setConfig(c);
 
+	Ransac R;
+	R.setMaxIteration(c.kmaxIterations);	
 	// TODO: Change the max iteration and distance tolerance arguments for Ransac function
-	std::unordered_set<int> inliers = Ransac(cloud, 0, 0);
+	std::unordered_set<int> inliers = Ransac2d(cloud, c.kmaxIterations, c.kthreshold);
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr  cloudInliers(new pcl::PointCloud<pcl::PointXYZ>());
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudOutliers(new pcl::PointCloud<pcl::PointXYZ>());

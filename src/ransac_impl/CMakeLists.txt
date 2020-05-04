@@ -5,21 +5,18 @@ add_definitions(-std=c++11)
 set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS, "${CXX_FLAGS}")
 
-project(playback)
+project(ransac)
 
 find_package(PCL 1.2 REQUIRED)
 
-include_directories(${PCL_INCLUDE_DIRS}
-                    ../../ransac_impl)
+include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4")
 
 
-add_executable (quizRansac ransac2d.cpp ../../render/render.cpp)
-target_link_libraries (quizRansac ${PCL_LIBRARIES} )
-target_link_libraries (ransac)
-
+add_library (ransac ransac_impl.cpp )
+target_link_libraries (ransac ${PCL_LIBRARIES})
 
 
 

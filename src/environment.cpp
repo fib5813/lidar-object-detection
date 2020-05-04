@@ -84,7 +84,7 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     separatedClouds = pointCloudProcessor.SegmentPlane(lidarOutput, numIterationsPlaneDetection, distanceThresholdPlaneDetection);
     // renderRays(viewer, lidar->position, lidarOutput);
     renderPointCloud(viewer, separatedClouds.first, "non ground", Color(1, 0, 0));
-    renderPointCloud(viewer, separatedClouds.second, "lidar output", Color(0,1,0));
+    renderPointCloud(viewer, separatedClouds.second, "object cloud", Color(0,1,0));
     
     
   
