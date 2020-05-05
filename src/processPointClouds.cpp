@@ -1,6 +1,8 @@
 // PCL lib Functions for processing point clouds 
 
 #include "processPointClouds.h"
+#include "ransac_impl/ransac_impl.h"
+#include <unordered_set>
 
 
 //constructor:
@@ -39,7 +41,8 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
 
 
 template<typename PointT>
-std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::SeparateClouds(pcl::PointIndices::Ptr inliers, typename pcl::PointCloud<PointT>::Ptr cloud) {
+std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::
+SeparateClouds(pcl::PointIndices::Ptr inliers, typename pcl::PointCloud<PointT>::Ptr cloud) {
 
   // TODO: Create two new point clouds, one cloud with obstacles and other with segmented plane
     typename pcl::PointCloud<PointT>::Ptr groundPlane( new pcl::PointCloud<PointT>);
@@ -76,7 +79,8 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT
 
 
 template<typename PointT>
-std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::SegmentPlane(typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, float distanceThreshold)
+std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::
+SegmentPlane(typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, double distanceThreshold)
 {
     // Time segmentation process
     auto startTime = std::chrono::steady_clock::now();
@@ -95,14 +99,31 @@ std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT
     seg.setDistanceThreshold (distanceThreshold);
   
     seg.setInputCloud (cloud);
-    seg.segment (*inliers, *coefficients);
+    
+    ////////////////////////////// either
 
+    // seg.segment (*inliers, *coefficients);
     auto endTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-    std::cout << "plane segmentation took " << elapsedTime.count() << " milliseconds" << std::endl;
+    // std::cout << "plane segmentation took " << elapsedTime.count() << " milliseconds" << std::endl;
 
-    std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> segResult = SeparateClouds(inliers,cloud);
+
+    ////////////////////////////// or
+    Ransac R;
+    R.setMaxIteration(maxIterations);
+    R.setThreshold(distanceThreshold);
+    std::unordered_set<int> inliers_ransac = R.RansacPlane(cloud);
+
+    for(auto i : inliers_ransac){
+        inliers->indices.push_back(i);
+    }
+    std::cout << "inliers count = " << inliers->indices.size() << "  " << inliers_ransac.size() << std::endl; 
+    /////////////////////////////// end
+
+    std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> segResult = 
+    SeparateClouds(inliers,cloud);
     return segResult;
+    
 }
 
 

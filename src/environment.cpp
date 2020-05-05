@@ -8,6 +8,7 @@
 // using templates for processPointClouds so also include .cpp to help linker
 #include "processPointClouds.cpp"
 #include "setConfig.h"
+#include "ransac_impl/ransac_impl.h"
 
 std::vector<Car> initHighway(bool renderScene, pcl::visualization::PCLVisualizer::Ptr& viewer)
 {
@@ -27,9 +28,9 @@ std::vector<Car> initHighway(bool renderScene, pcl::visualization::PCLVisualizer
     {
         renderHighway(viewer);
         egoCar.render(viewer);
-        car1.render(viewer);
-        car2.render(viewer);
-        car3.render(viewer);
+        // car1.render(viewer);
+        // car2.render(viewer);
+        // car3.render(viewer);
     }
 
     return cars;

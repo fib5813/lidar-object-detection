@@ -90,7 +90,11 @@ std::unordered_set<int> Ransac::RansacPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr 
 			std::array<float, 3> p4 = {cloud->points[i].x, cloud->points[i].y,cloud->points[i].z};
 			
 			float dist = std::fabs((a*p4.at(0)) + (b*p4.at(1)) + (c*p4.at(2)) + d)/sqrt((a*a) + (b*b) + (c*c));
-			// std::cout << x1 << "  " << x2 << "  " << y1 << "  " << y2 << "  " << a << "  " << b << "  " << c << "  " << x3 << "  " << y3 << "  " << dist << std::endl;
+			std::cout << p1.at(0) << "  " << p1.at(1) << "  " << p1.at(2) << "  " 
+                      << p2.at(0) << "  " << p2.at(1) << "  " << p2.at(2) << "  "  
+                      << p3.at(0) << "  " << p3.at(1) << "  " << p3.at(2) << "  " 
+                      << a << "  " << b << "  " << c << "  " << d << "  " 
+                      << p4.at(0) << "  " << p4.at(1) << "  " << p4.at(2) << "  " << dist << "  " << Ransac::threshold << std::endl;
 			if(dist < Ransac::threshold){
 				inliers.insert(i);
 				// std::cout << x1 << "  " << x2 << "  " << y1 << "  " << y2 << "  " << a << "  " << b << "  " << c << "  " << x3 << "  " << y3 << "  " << dist << "   " << distanceTol << std::endl;

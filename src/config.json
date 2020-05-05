@@ -10,5 +10,5 @@
     "angleRange" : 30,
     "horizontalAngleInc" : 2,
     "numIterationsPlaneDetection" : 50,
-    "distanceThresholdPlaneDetection" : 0.04
+    "distanceThresholdPlaneDetection" : 0.3
 }
