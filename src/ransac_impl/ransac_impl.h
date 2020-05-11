@@ -25,10 +25,10 @@ public:
     void setMaxIteration(int in){maxIteration = in;};
     void setThreshold(double in){threshold = in;};
     void run();
-    std::unordered_set<int> RansacLine(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, 
+    std::unordered_set<int> RansacLine(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, 
 								 double maxIterations, double distanceTol);
     
-    std::unordered_set<int> RansacPlane(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+    std::unordered_set<int> RansacPlane(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud);
 
 
 

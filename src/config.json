@@ -5,10 +5,14 @@
     "maxDistance" : 200,
     "resolution" : 0.1,
     "sderr" : 0.03,
-    "numLayers" : 32,
+    "numLayers" : 16,
     "steepestAngle" : -30,
     "angleRange" : 30,
     "horizontalAngleInc" : 2,
     "numIterationsPlaneDetection" : 50,
-    "distanceThresholdPlaneDetection" : 0.3
+    "distanceThresholdPlaneDetection" : 0.3,
+    "clusterTolerance" : 1.5,
+    "clusterMinSize" : 5,
+    "clusterMaxSize" : 100
+    
 }

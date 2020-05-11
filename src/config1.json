@@ -1,0 +1,12 @@
+{
+    "filterRes" : 0.3,
+    "minx" : -10,
+    "miny" : -20,
+    "minz" : -3,
+    "maxx" : 20,
+    "maxy" : 20,
+    "maxz" : 5,
+    "numIterationsPlaneDetection" : 50,
+    "distanceThresholdPlaneDetection" : 0.3
+    
+}

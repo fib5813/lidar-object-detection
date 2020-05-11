@@ -37,59 +37,73 @@ std::vector<Car> initHighway(bool renderScene, pcl::visualization::PCLVisualizer
 }
 
 
-void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
-{
-    // ----------------------------------------------------
-    // -----Open 3D viewer and display simple highway -----
-    // ----------------------------------------------------
+// void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
+// {
+//     // ----------------------------------------------------
+//     // -----Open 3D viewer and display simple highway -----
+//     // ----------------------------------------------------
     
 
-    Config config;
-    setConfiguration(config);
+//     Config config;
+//     setConfiguration(config);
 
-    // RENDER OPTIONS
-    bool renderScene = true;
-    std::vector<Car> cars = initHighway(renderScene, viewer);
-    double groundSlope = config.kGroundSlope;
-    double minDistance = config.kMinDistance;
-    double maxDistance = config.kMaxDistance;
-    double resolution = config.kResolution;
-    double sderr = config.kSderr;
-    double numLayers = config.kNumLayers;
-    double steepestAngle = (pi/180)*config.kSteepestAngle;
-    double angleRange = (pi/180) * config.kAngleRange;
-    double horizontalAngleInc = (pi/180) * config.kHorizontalAngleInc;
-    double numIterationsPlaneDetection = config.kNumIterationsPlaneDetection;
-    double distanceThresholdPlaneDetection = config.kDistanceThresholdPlaneDetection;
-    // std::cout << groundSlope << "  " << minDistance << "  " << maxDistance << "  " << resolution << "  " << sderr << "  " << numLayers << "  " << steepestAngle << "  " << angleRange << "  " << horizontalAngleInc << std::endl;
+//     // RENDER OPTIONS
+//     bool renderScene = true;
+//     std::vector<Car> cars = initHighway(renderScene, viewer);
+//     double groundSlope = config.kGroundSlope;
+//     double minDistance = config.kMinDistance;
+//     double maxDistance = config.kMaxDistance;
+//     double resolution = config.kResolution;
+//     double sderr = config.kSderr;
+//     double numLayers = config.kNumLayers;
+//     double steepestAngle = (pi/180)*config.kSteepestAngle;
+//     double angleRange = (pi/180) * config.kAngleRange;
+//     double horizontalAngleInc = (pi/180) * config.kHorizontalAngleInc;
+//     double numIterationsPlaneDetection = config.kNumIterationsPlaneDetection;
+//     double distanceThresholdPlaneDetection = config.kDistanceThresholdPlaneDetection;
+//     float clusterTolerance = config.kClusterTolerance; 
+//     int clusterMinSize = config.kClusterMinSize;
+//     int clusterMaxSize = config.kClusterMaxSize;
+//     // std::cout << groundSlope << "  " << minDistance << "  " << maxDistance << "  " << resolution << "  " << sderr << "  " << numLayers << "  " << steepestAngle << "  " << angleRange << "  " << horizontalAngleInc << std::endl;
 
 
-    // TODO:: Create lidar sensor 
-    Lidar* lidar = new Lidar(cars, groundSlope);
-    lidar->modifyLidarParams(minDistance, 
-                             maxDistance, 
-                             groundSlope, 
-                             resolution, 
-                             sderr,
-                             numLayers,
-                             steepestAngle,
-                             angleRange,
-                             horizontalAngleInc);
+//     // TODO:: Create lidar sensor 
+//     Lidar* lidar = new Lidar(cars, groundSlope);
+//     lidar->modifyLidarParams(minDistance, 
+//                              maxDistance, 
+//                              groundSlope, 
+//                              resolution, 
+//                              sderr,
+//                              numLayers,
+//                              steepestAngle,
+//                              angleRange,
+//                              horizontalAngleInc);
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr lidarOutput = lidar->scan();
+//     pcl::PointCloud<pcl::PointXYZ>::Ptr lidarOutput = lidar->scan();
 
-    // TODO:: Create point processor
+//     // TODO:: Create point processor
 
-    ProcessPointClouds<pcl::PointXYZ> pointCloudProcessor;
-    std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> 
-    separatedClouds = pointCloudProcessor.SegmentPlane(lidarOutput, numIterationsPlaneDetection, distanceThresholdPlaneDetection);
-    // renderRays(viewer, lidar->position, lidarOutput);
-    renderPointCloud(viewer, separatedClouds.first, "non ground", Color(1, 0, 0));
-    renderPointCloud(viewer, separatedClouds.second, "object cloud", Color(0,1,0));
+//     ProcessPointClouds<pcl::PointXYZ> pointCloudProcessor;
+//     std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> 
+//     separatedClouds = pointCloudProcessor.SegmentPlane(lidarOutput, numIterationsPlaneDetection, distanceThresholdPlaneDetection);
+//     std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> clusters = 
+//     pointCloudProcessor.Clustering(separatedClouds.second, clusterTolerance, clusterMinSize, clusterMaxSize);
+    
+//     std::vector<Color> colors = {Color(1.0,0,0), Color(1.0,1.0,0), Color(0,0,1.0)};
+
+//     for(auto i=0; i<clusters.size(); i++){
+//         renderPointCloud(viewer, clusters[i], std::to_string(i), colors[i]);
+
+//         Box box = pointCloudProcessor.BoundingBox(clusters[i]);
+//         renderBox(viewer, box, i);
+//     }
+//     // renderRays(viewer, lidar->position, lidarOutput);
+//     // renderPointCloud(viewer, separatedClouds.first, "ground", Color(1, 0, 0));
+//     // renderPointCloud(viewer, separatedClouds.second, "object cloud", Color(0,1,0));
     
     
   
-}
+// }
 
 
 //setAngle: SWITCH CAMERA ANGLE {XY, TopDown, Side, FPS}
@@ -115,6 +129,35 @@ void initCamera(CameraAngle setAngle, pcl::visualization::PCLVisualizer::Ptr& vi
         viewer->addCoordinateSystem (1.0);
 }
 
+void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer)
+{
+  // ----------------------------------------------------
+  // -----Open 3D viewer and display City Block     -----
+  // ----------------------------------------------------
+
+    Config1 c;
+    setConfiguration1(c);
+
+    // RENDER OPTIONS
+    float filterRes = c.filterRes;
+
+    // filter cloud
+    ProcessPointClouds<pcl::PointXYZI>* pointProcessorI = new ProcessPointClouds<pcl::PointXYZI>();
+    pcl::PointCloud<pcl::PointXYZI>::Ptr inputCloud = pointProcessorI->loadPcd("../src/sensors/data/pcd/data_1/0000000000.pcd");
+    pcl::PointCloud<pcl::PointXYZI>::Ptr filterCloud;
+    filterCloud = pointProcessorI->FilterCloud(inputCloud, c.filterRes , Eigen::Vector4f (c.minx, c.miny, c.minz, 1), Eigen::Vector4f ( c.maxx, c.maxy, c.maxz, 1));
+    // renderPointCloud(viewer,filterCloud,"filterCloud");
+    // renderPointCloud(viewer,inputCloud,"inputCloud");
+
+    //segment road plane
+    std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> 
+    separatedClouds = pointProcessorI->SegmentPlane(filterCloud, c.numIterationsPlaneDetection, c.distanceThresholdPlaneDetection);
+    renderPointCloud(viewer, separatedClouds.first, "ground", Color(1, 0, 0));
+    renderPointCloud(viewer, separatedClouds.second, "object cloud", Color(0,1,0));
+    
+
+    delete pointProcessorI;
+}
 
 int main (int argc, char** argv)
 {
@@ -123,7 +166,9 @@ int main (int argc, char** argv)
     pcl::visualization::PCLVisualizer::Ptr viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
     CameraAngle setAngle = XY;
     initCamera(setAngle, viewer);
-    simpleHighway(viewer);
+    // simpleHighway(viewer);
+
+    cityBlock(viewer);
 
     while (!viewer->wasStopped ())
     {
