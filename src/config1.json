@@ -7,7 +7,7 @@
     "maxy" : 20,
     "maxz" : 5,
     "numIterationsPlaneDetection" : 50,
-    "distanceThresholdPlaneDetection" : 0.3,
+    "distanceThresholdPlaneDetection" : 0.2,
     "clusterTolerance" : 0.4,
     "clusterMinSize" : 20,
     "clusterMaxSize" : 1000
