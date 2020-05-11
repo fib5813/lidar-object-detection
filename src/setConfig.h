@@ -29,6 +29,9 @@ struct Config1{
     float maxz;
     float numIterationsPlaneDetection;
     float distanceThresholdPlaneDetection;
+    float clusterTolerance;
+    int clusterMinSize;
+    int clusterMaxSize;
 };
 
 void setConfiguration(Config& c){
@@ -67,4 +70,7 @@ void setConfiguration1(Config1& c){
     c.maxz = j.at("maxz");
     c.numIterationsPlaneDetection = j.at("numIterationsPlaneDetection");
     c.distanceThresholdPlaneDetection = j.at("distanceThresholdPlaneDetection");
+    c.clusterTolerance = j.at("clusterTolerance");
+    c.clusterMinSize = j.at("clusterMinSize");
+    c.clusterMaxSize = j.at("clusterMaxSize");
 }
