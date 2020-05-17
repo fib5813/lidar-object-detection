@@ -155,24 +155,25 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointCloud
     std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> 
     separatedClouds = pointProcessorI->SegmentPlane(filterCloud, c.numIterationsPlaneDetection, c.distanceThresholdPlaneDetection);
     // renderPointCloud(viewer, separatedClouds.first, "ground", Color(1, 0, 0));
-    renderPointCloud(viewer, separatedClouds.second, "objects", Color(0,1,0));
+    
+    // renderPointCloud(viewer, separatedClouds.second, "objects", Color(0,1,0));
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters = 
     pointProcessorI->Clustering(separatedClouds.second, c.clusterTolerance, c.clusterMinSize, c.clusterMaxSize);
 
     std::cout << "here 1" << std::endl;
     
-    std::vector<Color> colors = {Color(1.0,0,0), Color(1.0,1.0,0), Color(0,0,1.0)};
+    std::vector<Color> colors = {Color(1.0,0.5,0), Color(1.0,1.0,0), Color(0,0,1.0)};
 
     for(auto i=0; i<clusters.size(); i++){
-        std::cout << "here 2" << std::endl;
+        // std::cout << "here 2" << std::endl;
 
         renderPointCloud(viewer, clusters[i], std::to_string(i), colors[0]);
-        std::cout << "here 3" << std::endl;
+        // std::cout << "here 3" << std::endl;
 
         Box box = pointProcessorI->BoundingBox(clusters[i]);
-        renderBox(viewer, box, i);
+        // renderBox(viewer, box, i);
 
-        std::cout << "here 4" << std::endl;
+        // std::cout << "here 4" << std::endl;
 
     }
     std::cout << "here out!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
@@ -180,21 +181,26 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointCloud
     // delete pointProcessorI;
 }
 
-void clusterHelper(int i, const std::vector< pcl::PointXYZI, Eigen::aligned_allocator< pcl::PointXYZI > >& points, std::vector<int>& cluster, 
-				   std::vector<bool>& processed_points, KdTree* tree, float distanceTol){
+void clusterHelper(int i, const std::vector< pcl::PointXYZI, Eigen::aligned_allocator< pcl::PointXYZI > >& points, 
+                   std::vector<int>& cluster, std::vector<bool>& processed_points, KdTree* tree, float distanceTol){
 	processed_points[i] = true;
 	cluster.push_back(i);
+    // std::cout << "cluster size within helper = " << cluster.size() << std::endl;
 	std::vector<int> nearest_pts = tree->search(points[i], distanceTol);
-
+    std::cout << "search returned " << nearest_pts.size() << " points " << std::endl; 
 	for(int id : nearest_pts){
+        std::cout << "nearest point id = " << id << "   is processed  = " << processed_points[id] <<std::endl;
 		if(!processed_points[id]){
 			clusterHelper(id, points, cluster, processed_points, tree, distanceTol);
 		}
 	}
+
 }
 
 
-std::vector<std::vector<int>> euclideanCluster(const std::vector< pcl::PointXYZI, Eigen::aligned_allocator< pcl::PointXYZI > >& points, KdTree* tree, float distanceTol)
+std::vector<std::vector<int>> euclideanCluster
+(const std::vector< pcl::PointXYZI, Eigen::aligned_allocator< pcl::PointXYZI > >& points, KdTree* tree, 
+                    float distanceTol, int minSize, int maxSize)
 {
 
 	
@@ -210,7 +216,10 @@ std::vector<std::vector<int>> euclideanCluster(const std::vector< pcl::PointXYZI
 
 		std::vector<int> cluster;
 		clusterHelper(i, points, cluster, processed_points, tree, distanceTol);
-		clusters.push_back(cluster);
+        std::cout << i <<"final cluster size end ============== " << cluster.size() << std::endl;
+        if ((cluster.size() > minSize) && (cluster.size() < maxSize)){
+           clusters.push_back(cluster);
+        }
 		i++;
 	}
  
@@ -230,9 +239,11 @@ int main (int argc, char** argv)
     // simpleHighway(viewer);
 
     ProcessPointClouds<pcl::PointXYZI>* pointProcessorI = new ProcessPointClouds<pcl::PointXYZI>();
-    std::vector<boost::filesystem::path> stream = pointProcessorI->streamPcd("../src/sensors/data/pcd/data_1");
-    auto streamIterator = stream.begin();
-    pcl::PointCloud<pcl::PointXYZI>::Ptr inputCloudI;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr inputCloudI = pointProcessorI->loadPcd("../src/sensors/data/pcd/data_1/0000000000.pcd");
+    
+    // std::vector<boost::filesystem::path> stream = pointProcessorI->streamPcd("../src/sensors/data/pcd/data_1");
+    // auto streamIterator = stream.begin();
+    // pcl::PointCloud<pcl::PointXYZI>::Ptr inputCloudI;
     // cityBlock(viewer);
 
     while (!viewer->wasStopped ())
@@ -243,12 +254,12 @@ int main (int argc, char** argv)
     viewer->removeAllShapes();
 
     // Load pcd and run obstacle detection process
-    inputCloudI = pointProcessorI->loadPcd((*streamIterator).string());
+    // inputCloudI = pointProcessorI->loadPcd((*streamIterator).string());
     cityBlock(viewer, pointProcessorI, inputCloudI);
 
-    streamIterator++;
-    if(streamIterator == stream.end())
-        streamIterator = stream.begin();
+    // streamIterator++;
+    // if(streamIterator == stream.end())
+    //     streamIterator = stream.begin();
 
     viewer->spinOnce ();
     }

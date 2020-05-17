@@ -176,15 +176,15 @@ Clustering(typename pcl::PointCloud<PointT>::Ptr cloud, float clusterTolerance, 
     // ec.extract(clusterIndices);
 
     //cluster kd tree elements
-    std::vector<std::vector<int>> ECclusters = euclideanCluster(cloud->points, tree, clusterTolerance);
+    std::vector<std::vector<int>> ECclusters = euclideanCluster(cloud->points, tree, clusterTolerance, minSize, maxSize);
   	for (int i = 0; i < ECclusters.size(); i++){
         pcl::PointCloud<pcl::PointXYZI>::Ptr outCloud (new pcl::PointCloud<pcl::PointXYZI>);
-        if ((ECclusters[i].size() > minSize) && (ECclusters[i].size() < maxSize)){
+        // if ((ECclusters[i].size() > minSize) && (ECclusters[i].size() < maxSize)){
             
             for (int p = 0; p <ECclusters[i].size(); p++){
                 outCloud->points.push_back(cloud->points[p]);
             }
-        }
+        // }
         clusters.push_back(outCloud);
     }
 

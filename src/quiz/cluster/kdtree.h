@@ -69,20 +69,22 @@ struct KdTree
 
 	void searchHelper(pcl::PointXYZI target, Node* node, int depth, float distanceTol, std::vector<int>& ids){
 		if (node != NULL){
+			// std::cout<< "not null: node " << node->point.x << "  " << target.x  << "  " << node->point.y << "  " << target.y<< std::endl;;
 			if((node->point.x >= (target.x - distanceTol) && 
 			    node->point.x <= (target.x + distanceTol)) &&
 			   (node->point.y >= (target.y - distanceTol) && 
-			    node->point.y <= (target.y + distanceTol)) &&
-			   (node->point.z >= (target.z - distanceTol) && 
-			    node->point.z <= (target.z + distanceTol)))
+			    node->point.y <= (target.y + distanceTol)))// &&
+			//    (node->point.z >= (target.z - distanceTol) && 
+			//     node->point.z <= (target.z + distanceTol)))
 			{
 				float distance = sqrt((node->point.x - target.x)*(node->point.x - target.x) + 
-				   				 	  (node->point.y - target.y)*(node->point.y - target.y) +
-									  (node->point.z - target.z)*(node->point.z - target.z));
-					// std::cout<< "distance = " << distance << std::endl;
+				   				 	  (node->point.y - target.y)*(node->point.y - target.y)); //+
+									//   (node->point.z - target.z)*(node->point.z - target.z));
+					std::cout<< "distance = " << distance << "points: " << node->point.x << "  " 
+					         << target.x  << "  " << node->point.y << "  " << target.y  << std::endl;
 				if(distance <= distanceTol){
 					ids.push_back(node->id);
-					// std::cout << "ids_size = " << ids.size() <<std::endl;
+					// std::cout << "search size = " << ids.size() <<std::endl;
 				}
 			}
 			float comp1;
@@ -124,7 +126,7 @@ struct KdTree
 	{
 		std::vector<int> ids;
 		searchHelper(target, root, 0, distanceTol, ids);
-		// std::cout << "searchHelper" << ids.size() << std::endl;
+		std::cout << "searchHelper search end size +++++ " << ids.size() << std::endl;
 		return ids;
 	}
 	
