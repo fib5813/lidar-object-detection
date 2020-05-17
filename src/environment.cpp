@@ -158,18 +158,67 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointCloud
     renderPointCloud(viewer, separatedClouds.second, "objects", Color(0,1,0));
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters = 
     pointProcessorI->Clustering(separatedClouds.second, c.clusterTolerance, c.clusterMinSize, c.clusterMaxSize);
+
+    std::cout << "here 1" << std::endl;
     
     std::vector<Color> colors = {Color(1.0,0,0), Color(1.0,1.0,0), Color(0,0,1.0)};
 
     for(auto i=0; i<clusters.size(); i++){
+        std::cout << "here 2" << std::endl;
+
         renderPointCloud(viewer, clusters[i], std::to_string(i), colors[0]);
+        std::cout << "here 3" << std::endl;
 
         Box box = pointProcessorI->BoundingBox(clusters[i]);
         renderBox(viewer, box, i);
+
+        std::cout << "here 4" << std::endl;
+
     }
+    std::cout << "here out!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
 
     // delete pointProcessorI;
 }
+
+void clusterHelper(int i, const std::vector< pcl::PointXYZI, Eigen::aligned_allocator< pcl::PointXYZI > >& points, std::vector<int>& cluster, 
+				   std::vector<bool>& processed_points, KdTree* tree, float distanceTol){
+	processed_points[i] = true;
+	cluster.push_back(i);
+	std::vector<int> nearest_pts = tree->search(points[i], distanceTol);
+
+	for(int id : nearest_pts){
+		if(!processed_points[id]){
+			clusterHelper(id, points, cluster, processed_points, tree, distanceTol);
+		}
+	}
+}
+
+
+std::vector<std::vector<int>> euclideanCluster(const std::vector< pcl::PointXYZI, Eigen::aligned_allocator< pcl::PointXYZI > >& points, KdTree* tree, float distanceTol)
+{
+
+	
+	std::vector<std::vector<int>> clusters;
+	std::vector<bool> processed_points(points.size(), false);
+
+	int i=0;
+	while (i < points.size()){
+		if(processed_points[i]){
+			i++;
+			continue;
+		}
+
+		std::vector<int> cluster;
+		clusterHelper(i, points, cluster, processed_points, tree, distanceTol);
+		clusters.push_back(cluster);
+		i++;
+	}
+ 
+	return clusters;
+
+}
+
+
 
 int main (int argc, char** argv)
 {
