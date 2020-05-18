@@ -154,8 +154,8 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointCloud
     //segment road plane
     std::pair<pcl::PointCloud<pcl::PointXYZI>::Ptr, pcl::PointCloud<pcl::PointXYZI>::Ptr> 
     separatedClouds = pointProcessorI->SegmentPlane(filterCloud, c.numIterationsPlaneDetection, c.distanceThresholdPlaneDetection);
-    // renderPointCloud(viewer, separatedClouds.first, "ground", Color(1, 0, 0));
-    renderPointCloud(viewer, separatedClouds.second, "objects", Color(0,1,0));
+    renderPointCloud(viewer, separatedClouds.first, "ground", Color(0, 1, 0));
+    // renderPointCloud(viewer, separatedClouds.second, "objects", Color(0,1,0));
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters = 
     // pointProcessorI->Clustering(separatedClouds.second, c.clusterTolerance, c.clusterMinSize, c.clusterMaxSize);
     pointProcessorI->ownClustering(separatedClouds.second, c.clusterTolerance, c.clusterMinSize, c.clusterMaxSize);
