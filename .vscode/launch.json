@@ -9,7 +9,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/home/user/projects/lidar-object-detection/src/quiz/cluster/build/quizCluster",
+            "program": "/home/user/projects/lidar-object-detection/build/environment",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

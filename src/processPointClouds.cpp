@@ -143,6 +143,89 @@ SegmentPlane(typename pcl::PointCloud<PointT>::Ptr cloud, int maxIterations, dou
 
 
 template<typename PointT>
+void ProcessPointClouds<PointT>::clusterHelper(int i, const std::vector<std::vector<float> >& points, std::vector<int>& cluster, 
+				   std::vector<bool>& processed_points, KdTree* tree, float distanceTol){
+	processed_points[i] = true;
+	cluster.push_back(i);
+	std::vector<int> nearest_pts = tree->search(points[i], distanceTol);
+
+	for(int id : nearest_pts){
+		if(!processed_points[id]){
+			clusterHelper(id, points, cluster, processed_points, tree, distanceTol);
+		}
+	}
+}
+
+
+template<typename PointT>
+std::vector<std::vector<int>> ProcessPointClouds<PointT>::euclideanCluster(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol)//, int minSize, int maxSize)
+{
+
+	
+	std::vector<std::vector<int>> clusters;
+	std::vector<bool> processed_points(points.size(), false);
+
+	int i=0;
+	while (i < points.size()){
+		if(processed_points[i]){
+			i++;
+			continue;
+		}
+
+		std::vector<int> cluster;
+		clusterHelper(i, points, cluster, processed_points, tree, distanceTol);
+		// if (cluster.size() > minSize && cluster.size() < maxSize){ 
+		clusters.push_back(cluster);		
+		// }
+		i++;
+	}
+ 
+	return clusters;
+
+}
+
+
+
+
+template<typename PointT>
+std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::
+ownClustering(typename pcl::PointCloud<PointT>::Ptr cloud, float clusterTolerance, int minSize, int maxSize){
+    // Time clustering process
+    auto startTime = std::chrono::steady_clock::now();
+    
+    std::vector<typename pcl::PointCloud<PointT>::Ptr> clusters;
+    std::vector<std::vector<float>> pointsAsVector;
+    KdTree* tree = new KdTree;
+
+    for(int i = 0; i < cloud->points.size(); i++){
+        PointT point = cloud->points[i];
+        std::vector<float> vectorPoint = {point.x, point.y, point.z};
+        pointsAsVector.push_back(vectorPoint);
+        tree->insert(vectorPoint, i);
+    }
+
+    std::vector<std::vector<int>> clusterIndices = euclideanCluster(pointsAsVector, tree, clusterTolerance);//, minSize, maxSize);
+
+    for (int i=0; i < clusterIndices.size(); i++){
+        typename pcl::PointCloud<PointT>::Ptr outCluster(new pcl::PointCloud<PointT>);
+        if (clusterIndices[i].size() > minSize && clusterIndices[i].size() < maxSize){ 
+            for (int p = 0; p < clusterIndices[i].size(); p++){
+                outCluster->points.push_back(cloud->points[clusterIndices[i][p]]);
+            }   
+            clusters.push_back(outCluster);
+        }
+    }
+
+    auto endTime = std::chrono::steady_clock::now();
+    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    std::cout << "clustering took " << elapsedTime.count() << " milliseconds and found " << clusters.size() << " clusters" << std::endl;
+    // std::cout << clusters[0]->points[0].x << "  " << clusters[0]->points[0].y << "  " << clusters[0]->points[0].z << "  " << std::endl;
+
+    return clusters;
+}
+
+
+template<typename PointT>
 std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::
 Clustering(typename pcl::PointCloud<PointT>::Ptr cloud, float clusterTolerance, int minSize, int maxSize)
 {

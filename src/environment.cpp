@@ -157,14 +157,17 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPointCloud
     // renderPointCloud(viewer, separatedClouds.first, "ground", Color(1, 0, 0));
     renderPointCloud(viewer, separatedClouds.second, "objects", Color(0,1,0));
     std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> clusters = 
-    pointProcessorI->Clustering(separatedClouds.second, c.clusterTolerance, c.clusterMinSize, c.clusterMaxSize);
-    
-    std::vector<Color> colors = {Color(1.0,0,0), Color(1.0,1.0,0), Color(0,0,1.0)};
+    // pointProcessorI->Clustering(separatedClouds.second, c.clusterTolerance, c.clusterMinSize, c.clusterMaxSize);
+    pointProcessorI->ownClustering(separatedClouds.second, c.clusterTolerance, c.clusterMinSize, c.clusterMaxSize);
+
+    std::vector<Color> colors = {Color(1.0,0.5,0), Color(1.0,1.0,0), Color(0,0,1.0)};
 
     for(auto i=0; i<clusters.size(); i++){
+        // std::cout << "clustersize = " << clusters[i]->points.size() << " " << clusters[i]->points[0].x << " " << clusters[i]->points[0].z << " " << clusters[i]->points[0].z << std::endl;
         renderPointCloud(viewer, clusters[i], std::to_string(i), colors[0]);
 
         Box box = pointProcessorI->BoundingBox(clusters[i]);
+        // std::cout << box.x_min << " " << box.x_max << " " << box.y_min << " " << box.y_max << " " << box.z_min << " " << box.z_max << std::endl;
         renderBox(viewer, box, i);
     }
 

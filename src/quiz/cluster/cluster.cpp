@@ -90,7 +90,7 @@ void clusterHelper(int i, const std::vector<std::vector<float> >& points, std::v
 }
 
 
-std::vector<std::vector<int>> euclideanCluster(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol)
+std::vector<std::vector<int>> euclideanCluster(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol)//, int minSize, int maxSize)
 {
 
 	
@@ -106,7 +106,9 @@ std::vector<std::vector<int>> euclideanCluster(const std::vector<std::vector<flo
 
 		std::vector<int> cluster;
 		clusterHelper(i, points, cluster, processed_points, tree, distanceTol);
-		clusters.push_back(cluster);
+		// if (cluster.size() > minSize && cluster.size() < maxSize){ 
+			clusters.push_back(cluster);		
+		// }
 		i++;
 	}
  
