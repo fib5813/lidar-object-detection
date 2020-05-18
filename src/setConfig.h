@@ -36,7 +36,7 @@ struct Config1{
 
 void setConfiguration(Config& c){
     
-    std::ifstream ifs("/home/user/projects/lidar-object-detection/src/config.json");
+    std::ifstream ifs("../src/config.json");
     nlohmann::json j = nlohmann::json::parse(ifs);
     
     c.kGroundSlope = j.at("groundSlope");
@@ -58,7 +58,7 @@ void setConfiguration(Config& c){
 }
 
 void setConfiguration1(Config1& c){
-    std::ifstream ifs("/home/user/projects/lidar-object-detection/src/config1.json");
+    std::ifstream ifs("../src/config1.json");
     nlohmann::json j = nlohmann::json::parse(ifs);
     
     c.filterRes = j.at("filterRes");
